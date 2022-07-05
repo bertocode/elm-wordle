@@ -1,5 +1,9 @@
 @import url('http://fonts.cdnfonts.com/css/open-sans');
 
+:root {
+    --separator-border: 1px solid #636363;
+}
+
 body {
     background-color: #2c2626;
     color: #fff;
@@ -9,14 +13,14 @@ body {
 }
 
 header {
-    border-bottom: 1px solid #636363;
+    border-bottom: var(--separator-border);
     text-align: center;
 }
 
 .grid {
     display: flex;
     flex-direction: column;
-    margin-top: 5px;
+    margin: 15px 0;
 }
 
 .word {
@@ -48,4 +52,21 @@ header {
 
 .letter.incorrect-position {
     background-color: #cabd00;
+}
+
+.letter.not-in-word {
+    background-color: #808080;
+}
+
+.keyboard {
+    display: flex;
+    flex-direction: column;
+    padding-top: 15px;
+    border-top: var(--separator-border);
+}
+
+.keyboard-line {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
 }

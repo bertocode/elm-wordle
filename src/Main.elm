@@ -3,6 +3,7 @@ module Main exposing (..)
 import Array exposing (Array)
 import Browser
 import Browser.Events exposing (onKeyDown)
+import Browser.Navigation exposing (Key)
 import Char exposing (isAlpha)
 import Html exposing (Html, div, h1, header, main_, node, section, text)
 import Html.Attributes exposing (class, href, rel)
@@ -44,6 +45,19 @@ type Msg
     | PressRemove
     | TryWord
     | NoOp
+
+
+type KeyboardKeyState
+    = InOrder
+    | NotInOrder
+    | NotInWord
+    | NotUsed
+
+
+type LetterInWord
+    = Correct
+    | BadOrder
+    | Incorrect
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -120,8 +134,8 @@ update msg model =
 ---- VIEW ----
 
 
-getLetterClass : Int -> Char -> String -> String
-getLetterClass currentPosition char wordToGuess =
+getLetterState : Int -> Char -> String -> LetterInWord
+getLetterState currentPosition char wordToGuess =
     let
         charToString =
             String.fromList [ char ]
@@ -130,13 +144,26 @@ getLetterClass currentPosition char wordToGuess =
             String.indexes charToString wordToGuess
     in
     if List.member currentPosition indexes then
-        "success"
+        Correct
 
     else if String.contains charToString wordToGuess then
-        "incorrect-position"
+        BadOrder
 
     else
-        "wrong"
+        Incorrect
+
+
+letterInWordToClass : LetterInWord -> String
+letterInWordToClass letterInWord =
+    case letterInWord of
+        Correct ->
+            "success"
+
+        BadOrder ->
+            "incorrect-position"
+
+        Incorrect ->
+            "wrong"
 
 
 view : Model -> Html Msg
@@ -158,7 +185,7 @@ view model =
                             if index < model.currentTypedWord then
                                 List.indexedMap
                                     (\letterIndex letter ->
-                                        div [ class ("letter " ++ getLetterClass letterIndex letter model.wordToGuess) ]
+                                        div [ class ("letter " ++ (getLetterState letterIndex letter model.wordToGuess |> letterInWordToClass)) ]
                                             [ text (String.fromList [ letter ])
                                             ]
                                     )
@@ -183,8 +210,93 @@ view model =
                     model.wordsUsed
                     |> Array.toList
                 )
+            , section [ class "keyboard" ] <|
+                List.map
+                    (\keyboardLine ->
+                        div [ class "keyboard-line" ] <|
+                            List.map
+                                (\letter ->
+                                    div [ class <| "letter " ++ (getKeyBoardColor letter model.currentTypedWord model.wordsUsed model.wordToGuess |> keyboardKeyStateToClassColor) ] [ text (String.fromList [ letter ]) ]
+                                )
+                                (keyboardLine |> String.toList)
+                    )
+                    keyboardLetters
             ]
         ]
+
+
+keyboardKeyStateToClassColor : KeyboardKeyState -> String
+keyboardKeyStateToClassColor keyState =
+    case keyState of
+        NotUsed ->
+            ""
+
+        NotInOrder ->
+            "incorrect-position"
+
+        NotInWord ->
+            "not-in-word"
+
+        InOrder ->
+            "success"
+
+
+getKeyBoardColor : Char -> Int -> Array String -> String -> KeyboardKeyState
+getKeyBoardColor currentKey currentIndex arrayOfWords wordToGuess =
+    let
+        charAsString =
+            String.fromList [ currentKey ]
+
+        availableWords =
+            Array.slice 0 currentIndex arrayOfWords
+
+        keyExistInCurrent =
+            Array.foldl
+                (\word acc ->
+                    String.contains charAsString word || acc
+                )
+                False
+                availableWords
+
+        keyInWord =
+            Array.foldl
+                (\word acc ->
+                    String.contains charAsString wordToGuess || acc
+                )
+                False
+                availableWords
+
+        -- salm|o|n | carl|o|s
+        keyInOrder =
+            Array.foldl
+                (\word acc ->
+                    List.append (String.indexes charAsString word) acc
+                )
+                []
+                availableWords
+                |> Set.fromList
+                |> Set.foldl (\el acc -> List.member el (String.indexes charAsString wordToGuess) || acc) False
+    in
+    case ( keyExistInCurrent, keyInWord, keyInOrder ) of
+        ( True, True, True ) ->
+            InOrder
+
+        ( True, True, False ) ->
+            NotInOrder
+
+        ( False, _, _ ) ->
+            NotUsed
+
+        ( True, False, _ ) ->
+            NotInWord
+
+
+keyboardLetters : List String
+keyboardLetters =
+    [ "qwertyuiop"
+    , "asdfghjkl"
+    , "zxcvbnm"
+    ]
 
 
 
