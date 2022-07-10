@@ -2,7 +2,7 @@
   "scripts": {
     "build": "elm make --optimize src/Main.elm --output=build/elm.js",
     "debug": "elm make --debug --output=build/elm.js src/Main.elm && elm reactor",
-    "deploy": "elm make --optimize src/Main.elm --output=build/elm.js && gh-pages -d"
+    "deploy": "elm make --optimize src/Main.elm --output=build/elm.js && gh-pages -d ."
   },
   "devDependencies": {
     "elm-format": "^0.8.5",
