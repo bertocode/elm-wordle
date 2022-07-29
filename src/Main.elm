@@ -2,11 +2,12 @@ module Main exposing (..)
 
 import Array exposing (Array)
 import Browser
-import Browser.Events exposing (onKeyDown)
+import Browser.Events exposing (onClick, onKeyDown)
 import Browser.Navigation exposing (Key)
 import Char exposing (isAlpha)
-import Html exposing (Html, div, h1, header, main_, node, section, text)
+import Html exposing (Html, a, div, h1, header, main_, node, section, text)
 import Html.Attributes exposing (class, href, rel)
+import Html.Events
 import Json.Decode as D
 import Set exposing (Set)
 
@@ -216,7 +217,12 @@ view model =
                         div [ class "keyboard-line" ] <|
                             List.map
                                 (\letter ->
-                                    div [ class <| "letter " ++ (getKeyBoardColor letter model.currentTypedWord model.wordsUsed model.wordToGuess |> keyboardKeyStateToClassColor) ] [ text (String.fromList [ letter ]) ]
+                                    a
+                                        [ class <| "letter " ++ (getKeyBoardColor letter model.currentTypedWord model.wordsUsed model.wordToGuess |> keyboardKeyStateToClassColor)
+                                        , href "#"
+                                        , Html.Events.onClick <| Typed letter
+                                        ]
+                                        [ text (String.fromList [ letter ]) ]
                                 )
                                 (keyboardLine |> String.toList)
                     )
