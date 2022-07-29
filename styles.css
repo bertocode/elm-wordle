@@ -77,3 +77,8 @@ header {
     flex-direction: row;
     justify-content: center;
 }
+
+.keyboard-line>a {
+    text-decoration: none;
+    color: white;
+}

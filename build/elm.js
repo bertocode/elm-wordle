@@ -5819,6 +5819,7 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none)) : _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
+var $elm$html$Html$a = _VirtualDom_node('a');
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -6174,7 +6175,7 @@ var $author$project$Main$getKeyBoardColor = F4(
 		var keyInWord = A3(
 			$elm$core$Array$foldl,
 			F2(
-				function (word, acc) {
+				function (_v1, acc) {
 					return A2($elm$core$String$contains, charAsString, wordToGuess) || acc;
 				}),
 			false,
@@ -6280,6 +6281,23 @@ var $elm$virtual_dom$VirtualDom$node = function (tag) {
 		_VirtualDom_noScript(tag));
 };
 var $elm$html$Html$node = $elm$virtual_dom$VirtualDom$node;
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 0, a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
 var $elm$core$String$cons = _String_cons;
 var $elm$core$String$fromChar = function (_char) {
 	return A2($elm$core$String$cons, _char, '');
@@ -6420,24 +6438,22 @@ var $author$project$Main$view = function (model) {
 								$elm$html$Html$Attributes$class('keyboard')
 							]),
 						A2(
-							$elm$core$List$map,
-							function (keyboardLine) {
-								return A2(
-									$elm$html$Html$div,
-									_List_fromArray(
-										[
-											$elm$html$Html$Attributes$class('keyboard-line')
-										]),
-									A2(
+							$elm$core$List$indexedMap,
+							F2(
+								function (idx, keyboardLine) {
+									var keyLine = A2(
 										$elm$core$List$map,
 										function (letter) {
 											return A2(
-												$elm$html$Html$div,
+												$elm$html$Html$a,
 												_List_fromArray(
 													[
 														$elm$html$Html$Attributes$class(
 														'letter ' + $author$project$Main$keyboardKeyStateToClassColor(
-															A4($author$project$Main$getKeyBoardColor, letter, model.i, model.r, model.A)))
+															A4($author$project$Main$getKeyBoardColor, letter, model.i, model.r, model.A))),
+														$elm$html$Html$Attributes$href('#'),
+														$elm$html$Html$Events$onClick(
+														$author$project$Main$Typed(letter))
 													]),
 												_List_fromArray(
 													[
@@ -6447,8 +6463,56 @@ var $author$project$Main$view = function (model) {
 																[letter])))
 													]));
 										},
-										$elm$core$String$toList(keyboardLine)));
-							},
+										$elm$core$String$toList(keyboardLine));
+									return A2(
+										$elm$html$Html$div,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('keyboard-line')
+											]),
+										function () {
+											switch (idx) {
+												case 2:
+													return _Utils_ap(
+														keyLine,
+														_List_fromArray(
+															[
+																A2(
+																$elm$html$Html$a,
+																_List_fromArray(
+																	[
+																		$elm$html$Html$Attributes$class('letter'),
+																		$elm$html$Html$Attributes$href('#'),
+																		$elm$html$Html$Events$onClick($author$project$Main$TryWord)
+																	]),
+																_List_fromArray(
+																	[
+																		$elm$html$Html$text('Enter')
+																	]))
+															]));
+												case 1:
+													return _Utils_ap(
+														keyLine,
+														_List_fromArray(
+															[
+																A2(
+																$elm$html$Html$a,
+																_List_fromArray(
+																	[
+																		$elm$html$Html$Attributes$class('letter'),
+																		$elm$html$Html$Attributes$href('#'),
+																		$elm$html$Html$Events$onClick($author$project$Main$PressRemove)
+																	]),
+																_List_fromArray(
+																	[
+																		$elm$html$Html$text('←')
+																	]))
+															]));
+												default:
+													return keyLine;
+											}
+										}());
+								}),
 							$author$project$Main$keyboardLetters))
 					]))
 			]));
