@@ -2,8 +2,7 @@ module Main exposing (..)
 
 import Array exposing (Array)
 import Browser
-import Browser.Events exposing (onClick, onKeyDown)
-import Browser.Navigation exposing (Key)
+import Browser.Events exposing (onKeyDown)
 import Char exposing (isAlpha)
 import Html exposing (Html, a, div, h1, header, main_, node, section, text)
 import Html.Attributes exposing (class, href, rel)
@@ -212,19 +211,34 @@ view model =
                     |> Array.toList
                 )
             , section [ class "keyboard" ] <|
-                List.map
-                    (\keyboardLine ->
+                List.indexedMap
+                    (\idx keyboardLine ->
+                        let
+                            keyLine =
+                                List.map
+                                    (\letter ->
+                                        a
+                                            [ class <| "letter " ++ (getKeyBoardColor letter model.currentTypedWord model.wordsUsed model.wordToGuess |> keyboardKeyStateToClassColor)
+                                            , href "#"
+                                            , Html.Events.onClick <| Typed letter
+                                            ]
+                                            [ text (String.fromList [ letter ]) ]
+                                    )
+                                    (keyboardLine |> String.toList)
+                        in
                         div [ class "keyboard-line" ] <|
-                            List.map
-                                (\letter ->
-                                    a
-                                        [ class <| "letter " ++ (getKeyBoardColor letter model.currentTypedWord model.wordsUsed model.wordToGuess |> keyboardKeyStateToClassColor)
-                                        , href "#"
-                                        , Html.Events.onClick <| Typed letter
-                                        ]
-                                        [ text (String.fromList [ letter ]) ]
-                                )
-                                (keyboardLine |> String.toList)
+                            case idx of
+                                2 ->
+                                    keyLine
+                                        ++ [ a [ class "letter", href "#", Html.Events.onClick <| TryWord ] [ text "Enter" ]
+                                           ]
+
+                                1 ->
+                                    keyLine
+                                        ++ [ a [ class "letter", href "#", Html.Events.onClick <| PressRemove ] [ text "←" ] ]
+
+                                _ ->
+                                    keyLine
                     )
                     keyboardLetters
             ]
@@ -266,7 +280,7 @@ getKeyBoardColor currentKey currentIndex arrayOfWords wordToGuess =
 
         keyInWord =
             Array.foldl
-                (\word acc ->
+                (\_ acc ->
                     String.contains charAsString wordToGuess || acc
                 )
                 False
